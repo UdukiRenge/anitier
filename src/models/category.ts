@@ -1,0 +1,1 @@
+export type PickupCategory = "favorite" | "watched" | "interested";

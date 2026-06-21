@@ -1,0 +1,50 @@
+export const genreMap: Record<string, string> = {
+  Action: 'アクション',
+  Adventure: '冒険',
+  Comedy: 'コメディ',
+  Drama: 'ドラマ',
+  Ecchi: 'エッチ',
+  Fantasy: 'ファンタジー',
+  Game: 'ゲーム',
+  Harem: 'ハーレム',
+  Historical: '歴史',
+  Horror: 'ホラー',
+  Josei: '女性向け',
+  Kids: 'キッズ',
+  Magic: '魔法',
+  'Martial Arts': '武術',
+  Mecha: 'メカ',
+  Military: '軍事',
+  Music: '音楽',
+  Mystery: 'ミステリー',
+  Psychological: '心理',
+  Romance: '恋愛',
+  Samurai: '侍',
+  School: '学園',
+  'Sci-Fi': 'SF',
+  Seinen: '青年向け',
+  Shoujo: '少女向け',
+  'Shoujo Ai': '少女愛',
+  Shounen: '少年向け',
+  'Shounen Ai': '少年愛',
+  'Slice of Life': '日常',
+  Space: '宇宙',
+  Sports: 'スポーツ',
+  'Super Power': '超能力',
+  Supernatural: '超自然',
+  Thriller: 'スリラー',
+  Vampire: '吸血鬼',
+  Yaoi: 'ボーイズラブ',
+  Yuri: 'ガールズラブ',
+  Dementia: '認知症/狂気',
+  Hentai: '成人向け',
+  Police: '警察',
+  'Historical Fiction': '歴史フィクション'
+};
+
+export const genreOptions = Object.entries(genreMap).map(
+  ([value, label]) => ({
+    value,
+    label
+  })
+);
