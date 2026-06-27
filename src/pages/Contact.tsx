@@ -1,9 +1,6 @@
-import { useState, useEffect } from 'react';
-import { DiLaravel } from 'react-icons/di';
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 
 const Contact: React.FC = () => {
-  const navigate = useNavigate();
 
   const [inquirieInput, setInquirieInput] = useState<string>("");
 
