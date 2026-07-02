@@ -1,10 +1,12 @@
 // コード取得:https://anilist.co/api/v2/oauth/authorize?client_id=35987&response_type=code&redirect_uri=http://localhost:5173/
-import sanitizeHtml from "sanitize-html";
+import * as sanitizeHtmlNamespace from "sanitize-html";
 import * as dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
 
 import axios from 'axios';
 import { createClient } from '@supabase/supabase-js';
+
+const sanitizeHtml = (sanitizeHtmlNamespace as any).default ?? sanitizeHtmlNamespace;
 
 export type AniListAnime = {
   id: number;
@@ -20,22 +22,111 @@ export type AniListAnime = {
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
 const supabaseServiceRoleKey = process.env.VITE_SUPABASE_SERVICE_ROLE_KEY;
-const aniListCode = process.env.VITE_ANILIST_CODE;
 const CLIENT_ID = process.env.VITE_ANILIST_CLIENT_ID!;
 const CLIENT_SECRET = process.env.VITE_ANILIST_CLIENT_SECRET!;
+const TOKEN_TABLE = 'anilist_tokens';
+const TOKEN_ROW_ID = 'anilist';
 
 if (!supabaseUrl || !supabaseServiceRoleKey) {
   console.error('❌ 環境変数が設定されていません: VITE_SUPABASE_URL, VITE_SUPABASE_SERVICE_ROLE_KEY');
   process.exit(1);
 }
 
-if (!aniListCode) {
-  console.error('❌ 環境変数が設定されていません: VITE_ANILIST_CODE');
+if (!CLIENT_ID || !CLIENT_SECRET) {
+  console.error('❌ 環境変数が設定されていません: VITE_ANILIST_CLIENT_ID, VITE_ANILIST_CLIENT_SECRET');
   process.exit(1);
 }
 
-const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
+const supabase = createClient<any, any>(supabaseUrl, supabaseServiceRoleKey);
+type AniListTokenRow = {
+  id: string;
+  refresh_token: string;
+  access_token?: string | null;
+  expires_at?: string | null;
+  updated_at?: string | null;
+};
 
+async function fetchStoredToken(): Promise<AniListTokenRow | null> {
+  const { data, error } = await supabase
+    .from(TOKEN_TABLE)
+    .select('*')
+    .eq('id', TOKEN_ROW_ID)
+    .single();
+
+  if (error && error.code !== 'PGRST116') {
+    console.error('❌ Supabase token fetch error:', error);
+    throw error;
+  }
+
+  return data ?? null;
+}
+
+async function saveTokenRow(row: AniListTokenRow) {
+  const { error } = await supabase
+    .from(TOKEN_TABLE)
+    .upsert(row, { onConflict: 'id' });
+
+  if (error) {
+    console.error('❌ Supabase token save error:', error);
+    throw error;
+  }
+}
+
+async function refreshAccessToken(refreshToken: string) {
+  const res = await axios.post(
+    'https://anilist.co/api/v2/oauth/token',
+    new URLSearchParams({
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken,
+      client_id: CLIENT_ID,
+      client_secret: CLIENT_SECRET,
+    }).toString(),
+    {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    }
+  );
+
+  return res.data as {
+    access_token: string;
+    refresh_token?: string;
+    expires_in: number;
+  };
+}
+
+function tokenIsValid(expiresAt?: string | null) {
+  if (!expiresAt) return false;
+  const expires = new Date(expiresAt).getTime();
+  return expires > Date.now() + 60_000;
+}
+
+async function getValidAccessToken() {
+  const storedToken = await fetchStoredToken();
+
+  if (storedToken && tokenIsValid(storedToken.expires_at)) {
+    console.log('🟢 保存済みアクセストークンが有効です');
+    return storedToken.access_token!;
+  }
+
+  if (storedToken?.refresh_token) {
+    console.log('🔄 refresh_token でアクセストークンを更新します');
+    const refreshed = await refreshAccessToken(storedToken.refresh_token);
+    const nextRefreshToken = refreshed.refresh_token ?? storedToken.refresh_token;
+    const expiresAt = new Date(Date.now() + refreshed.expires_in * 1000).toISOString();
+
+    await saveTokenRow({
+      id: TOKEN_ROW_ID,
+      refresh_token: nextRefreshToken,
+      access_token: refreshed.access_token,
+      expires_at: expiresAt,
+      updated_at: new Date().toISOString(),
+    });
+
+    return refreshed.access_token;
+  }
+
+  console.error('❌ 有効な refresh_token が見つかりません。まず初回登録用スクリプトで refresh_token を Supabase に保存してください。');
+  process.exit(1);
+}
 // descriptionのHTMLタグを除去
 function sanitizeDescription(raw?: string | null) {
   if (!raw) return null;
@@ -91,26 +182,6 @@ async function upsertAniList(animes: AniListAnime[]) {
   }
 }
 
-// code からアクセストークンを取得
-async function getAccessToken(code: string) {
-  const redirectUri = 'http://localhost:5173/'; // code取得時のredirect_uriと同じ
-  const res = await axios.post(
-    'https://anilist.co/api/v2/oauth/token',
-    new URLSearchParams({
-      grant_type: 'authorization_code',
-      client_id: CLIENT_ID,
-      client_secret: CLIENT_SECRET,
-      code,
-      redirect_uri: redirectUri
-    }).toString(),
-    {
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    }
-  );
-
-  return res.data.access_token;
-}
-
 // ページごとにAniList GraphQLを呼ぶ（リトライ付き）
 async function fetchAniListPageWithRetry(page: number, token: string, retries = 3): Promise<AniListAnime[]> {
   try {
@@ -158,7 +229,7 @@ async function syncAniList() {
     console.log('📡 AniListデータ同期開始');
 
     // code からアクセストークン取得
-    const accessToken = await getAccessToken(aniListCode!);
+    const accessToken = await getValidAccessToken();
     console.log('🟢 Access Token取得完了');
 
     // データ取得＆Supabase同期
