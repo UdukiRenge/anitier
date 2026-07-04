@@ -18,6 +18,8 @@ import type { PickupCategory } from '../models/category';
 import Dialog from './Dialog';
 import useDialog from '../hooks/useDialog';
 
+const baseUrl = import.meta.env.VITE_SUPABASE_URL;
+
 interface ButtonsProps {
   favorite: boolean;
   interested: boolean;
@@ -28,7 +30,7 @@ interface ButtonsProps {
 
 const fetchAnimeDetail = async (id: number) => {
   const res = await fetch(
-    "https://afdbvflforkisvfirzrs.functions.supabase.co/translate",
+    `${baseUrl}/translate`,
     {
       method: "POST",
       headers: {
