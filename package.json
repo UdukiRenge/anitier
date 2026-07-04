@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "sync:annict": "tsx src/scripts/sync-annict.ts"
+    "sync:anilist": "tsx src/scripts/sync-anilist.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
