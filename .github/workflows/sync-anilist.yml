@@ -1,0 +1,26 @@
+name: Monthly AniList sync
+
+on:
+  schedule:
+    - cron: '0 0 1 * *' # UTC で毎月1日0時
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    environment: ENV_PROD
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - run: npm ci
+
+      - run: npm run sync:anilist
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.VITE_SUPABASE_SERVICE_ROLE_KEY }}
+          VITE_ANILIST_CLIENT_ID: ${{ secrets.VITE_ANILIST_CLIENT_ID }}
+          VITE_ANILIST_CLIENT_SECRET: ${{ secrets.VITE_ANILIST_CLIENT_SECRET }}
