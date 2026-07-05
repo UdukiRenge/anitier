@@ -134,7 +134,7 @@ const Acount: React.FC = () => {
     };
 
     fetchUserInfo();
-  }, [setSpinner, dialog]);
+  }, [setSpinner]);
 
   return (
     <div className={`flex flex-col items-center justify-center h-screen ${editMode ? 'my-20' : ''}`}>
