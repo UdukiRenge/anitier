@@ -15,7 +15,11 @@ export const fetchAnimes = async (condition: AnimeSearchCondition) => {
 
   // ジャンル：完全一致
   if (condition.genre) {
-    query = query.contains('genres', [condition.genre]);
+    query = query.filter(
+      'genres',
+      'cs',
+      JSON.stringify([condition.genre])
+    );
   }
 
   // 放送時期(季節)：完全一致
