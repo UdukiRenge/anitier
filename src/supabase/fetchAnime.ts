@@ -8,6 +8,10 @@ export const fetchAnimes = async (condition: AnimeSearchCondition) => {
     .from('anime_with_pickups')
     .select('*');
 
+  console.log(condition.genre);
+  console.log(typeof condition.genre);
+  console.log(JSON.stringify([condition.genre]));
+
   // アニメ名：部分一致
   if (condition.title) {
     query = query.ilike('title', `%${condition.title}%`);
@@ -15,7 +19,11 @@ export const fetchAnimes = async (condition: AnimeSearchCondition) => {
 
   // ジャンル：完全一致
   if (condition.genre) {
-    query = query.contains('genres', [condition.genre]);
+    query = query.filter(
+      'genres',
+      'cs',
+      JSON.stringify([condition.genre])
+    );
   }
 
   // 放送時期(季節)：完全一致
