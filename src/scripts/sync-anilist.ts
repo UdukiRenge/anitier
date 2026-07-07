@@ -1,4 +1,4 @@
-// コード取得:https://anilist.co/api/v2/oauth/authorize?client_id=35987&response_type=code&redirect_uri=http://localhost:5173/
+// コード取得:https://anilist.co/api/v2/oauth/authorize?client_id=44899&response_type=code&redirect_uri=https://anitier-q8mr.vercel.app/
 import * as sanitizeHtmlNamespace from "sanitize-html";
 import * as dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
@@ -26,6 +26,8 @@ const CLIENT_ID = process.env.VITE_ANILIST_CLIENT_ID!;
 const CLIENT_SECRET = process.env.VITE_ANILIST_CLIENT_SECRET!;
 const TOKEN_TABLE = 'anilist_tokens';
 const TOKEN_ROW_ID = 'anilist';
+const START_PAGE = Number(process.env.START_PAGE) || 1;
+const RECENT_YEAR = new Date().getFullYear() - 1;
 
 if (!supabaseUrl || !supabaseServiceRoleKey) {
   console.error('❌ 環境変数が設定されていません: VITE_SUPABASE_URL, VITE_SUPABASE_SERVICE_ROLE_KEY');
@@ -183,12 +185,21 @@ async function upsertAniList(animes: AniListAnime[]) {
 }
 
 // ページごとにAniList GraphQLを呼ぶ（リトライ付き）
-async function fetchAniListPageWithRetry(page: number, token: string, retries = 3): Promise<AniListAnime[]> {
+type AniListPageResponse = {
+  Page: {
+    media: AniListAnime[];
+    pageInfo: { hasNextPage: boolean };
+  } | null;
+};
+
+async function fetchAniListPageWithRetry(page: number, token: string, retries = 3): Promise<{ media: AniListAnime[]; hasNextPage: boolean }> {
   try {
+    const recentFilter = `, seasonYear: ${RECENT_YEAR}`;
+
     const query = `
       query ($page: Int) {
         Page(page: $page, perPage: 50) {
-          media(type: ANIME, sort: [POPULARITY_DESC]) {
+          media(type: ANIME, sort: [START_DATE_DESC]${recentFilter}) {
             id
             title { native romaji english }
             coverImage { extraLarge large }
@@ -199,25 +210,41 @@ async function fetchAniListPageWithRetry(page: number, token: string, retries = 
             genres
             description(asHtml: false)
           }
+          pageInfo {
+            hasNextPage
+          }
         }
       }
     `;
   
-    const { data } = await axios.post(
+    const { data } = await axios.post<{ data: AniListPageResponse }>(
       'https://graphql.anilist.co',
       { query, variables: { page } },
       { headers: { Authorization: `Bearer ${token}` } }
     );
 
+    const pageData = data.data.Page;
+    if (!pageData) {
+      return { media: [], hasNextPage: false };
+    }
+
     // ページ取得後に少し待つ（レート制限対策）
     await new Promise(res => setTimeout(res, 4000));
-    return data.data.Page.media;
+    return { media: pageData.media, hasNextPage: pageData.pageInfo.hasNextPage };
 
   } catch (err: any) {
     if (err.response?.status === 429 && retries > 0) {
       console.log('⏳ レート制限に引っかかりました。5秒後に再試行します...');
       await new Promise(res => setTimeout(res, 5000));
       return fetchAniListPageWithRetry(page, token, retries - 1);
+    }
+    console.error('❌ GraphQL request failed', err.response?.status, err.response?.statusText);
+    if (err.response?.data) {
+      try {
+        console.error('Response body:', JSON.stringify(err.response.data, null, 2));
+      } catch (e) {
+        console.error('Response body (raw):', err.response.data);
+      }
     }
     throw err;
   }
@@ -233,16 +260,26 @@ async function syncAniList() {
     console.log('🟢 Access Token取得完了');
 
     // データ取得＆Supabase同期
-    let page = 1;
+    let page = START_PAGE;
     let processedCount = 0;
 
     while (true) {
-      const animes = await fetchAniListPageWithRetry(page, accessToken);
+      if (page > 100) {
+        console.log(`⚠ APIのページ制限に達しました: ${page - 1}ページ目まで処理しました。`);
+        break;
+      }
+
+      const { media: animes, hasNextPage } = await fetchAniListPageWithRetry(page, accessToken);
       if (!animes || animes.length === 0) break;
 
       await upsertAniList(animes);
       processedCount += animes.length;
       console.log(`✅ ページ ${page}: ${animes.length}件処理完了 (合計: ${processedCount}件)`);
+
+      if (!hasNextPage) {
+        console.log('✅ 最後のページに到達しました。');
+        break;
+      }
 
       page++;
     }
