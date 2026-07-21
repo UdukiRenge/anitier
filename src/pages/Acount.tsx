@@ -15,6 +15,7 @@ import { SupabaseError, SupabaseErrorCode } from '../models/supabaseError';
 import { CheckUserinfo } from '../utils/checkUserinfo';
 import Dialog from '../components/Dialog';
 import useDialog from '../hooks/useDialog';
+import SEO from "../components/seo";
 
 const Acount: React.FC = () => {
   const navigate = useNavigate();
@@ -137,121 +138,125 @@ const Acount: React.FC = () => {
   }, [setSpinner]);
 
   return (
-    <div className={`flex flex-col items-center justify-center h-screen ${editMode ? 'my-20' : ''}`}>
-      <Dialog
-        message={dialog.message}
-        isOpen={dialog.isOpen}
-        onClose={dialog.closeDialog}
-        type={dialog.type}
-        onCancel={dialog.closeCancel}
-      />
-      <p className="text-4xl md:text-5xl font-black ">ユーザー情報編集</p>
-      <div className="flex flex-col h-fit justify-center mt-5 w-2/5 max-w-xl min-w-80 bg-white border-gray-400 border p-10 rounded-lg shadow-lg gap-3">
-        <>
-          <p>ユーザー名</p>
-          <input
-            type="text"
-            value={loginId || '読み込み中...'}
-            className="border mb-5 p-2 rounded-lg w-auto bg-gray-100"
-            disabled
-          />
-        </>
-        {editMode && (
+    <>
+      <SEO title="アカウント設定画面" description="パスワードの変更や退会が可能です。" />
+      <div className={`flex flex-col items-center justify-center h-screen ${editMode ? 'my-20' : ''}`}>
+        
+        <Dialog
+          message={dialog.message}
+          isOpen={dialog.isOpen}
+          onClose={dialog.closeDialog}
+          type={dialog.type}
+          onCancel={dialog.closeCancel}
+        />
+        <p className="text-4xl md:text-5xl font-black ">ユーザー情報編集</p>
+        <div className="flex flex-col h-fit justify-center mt-5 w-2/5 max-w-xl min-w-80 bg-white border-gray-400 border p-10 rounded-lg shadow-lg gap-3">
           <>
-            <>
-              <p>現在のパスワード</p>
-              <input
-                type="password"
-                placeholder="現在のパスワード"
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                className="border mb-5 p-2 rounded-lg w-auto"
-              />
-            </>
-            <>
-              <p>新しいパスワード</p>
-              <input
-                type="password"
-                placeholder="新しいパスワード"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                className="border mb-5 p-2 rounded-lg w-auto"
-              />
-            </>
-            <>
-              <p>新しいパスワード（確認用）</p>
-              <input
-                type="password"
-                placeholder="確認用パスワード"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="border mb-5 p-2 rounded-lg w-auto"
-              />
-            </>
-          </>
-        )}
-        {!editMode && (
-          <>
-            <p>パスワード</p>
+            <p>ユーザー名</p>
             <input
-              type="password"
-              value="********"
+              type="text"
+              value={loginId || '読み込み中...'}
               className="border mb-5 p-2 rounded-lg w-auto bg-gray-100"
               disabled
-              readOnly
             />
-            <p className="text-sm text-gray-500 -mt-3 mb-3">※ パスワードは表示できません。変更時に新しいパスワードを入力してください。</p>
           </>
-        )}
-        <div className="flex justify-between mt-5">
           {editMode && (
             <>
-              <button
-                className="bg-black text-white h-10 w-2/5 rounded-lg border"
-                onClick={() => execUpdatePassword()}
-              >
-                更新
-              </button>
-              <button
-                className="bg-white text-black h-10 w-2/5 rounded-lg border"
-                onClick={() => {
-                  setEditMode(false);
-                  setCurrentPassword('');
-                  setNewPassword('');
-                  setConfirmPassword('');
-                }}
-              >
-                キャンセル
-              </button>
+              <>
+                <p>現在のパスワード</p>
+                <input
+                  type="password"
+                  placeholder="現在のパスワード"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  className="border mb-5 p-2 rounded-lg w-auto"
+                />
+              </>
+              <>
+                <p>新しいパスワード</p>
+                <input
+                  type="password"
+                  placeholder="新しいパスワード"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="border mb-5 p-2 rounded-lg w-auto"
+                />
+              </>
+              <>
+                <p>新しいパスワード（確認用）</p>
+                <input
+                  type="password"
+                  placeholder="確認用パスワード"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="border mb-5 p-2 rounded-lg w-auto"
+                />
+              </>
             </>
           )}
           {!editMode && (
             <>
-              <button 
-                className="bg-black text-white h-10 w-2/5 rounded-lg border"
-                onClick={() => setEditMode(!editMode)}
-              >
-                パスワード変更
-              </button>
-              <button 
-                className="bg-red-500 text-white h-10 w-2/5 rounded-lg border"
-                onClick={() =>
-                  dialog.showDialog(
-                    MESSAGE.info.WITHDRAWAL_CONFIRM,
-                    undefined,
-                    'confirm',
-                    execWithdraw
-                  )
-                }
-                disabled={isWithdrawing}
-              >
-                ユーザー退会
-              </button>
+              <p>パスワード</p>
+              <input
+                type="password"
+                value="********"
+                className="border mb-5 p-2 rounded-lg w-auto bg-gray-100"
+                disabled
+                readOnly
+              />
+              <p className="text-sm text-gray-500 -mt-3 mb-3">※ パスワードは表示できません。変更時に新しいパスワードを入力してください。</p>
             </>
           )}
+          <div className="flex justify-between mt-5">
+            {editMode && (
+              <>
+                <button
+                  className="bg-black text-white h-10 w-2/5 rounded-lg border"
+                  onClick={() => execUpdatePassword()}
+                >
+                  更新
+                </button>
+                <button
+                  className="bg-white text-black h-10 w-2/5 rounded-lg border"
+                  onClick={() => {
+                    setEditMode(false);
+                    setCurrentPassword('');
+                    setNewPassword('');
+                    setConfirmPassword('');
+                  }}
+                >
+                  キャンセル
+                </button>
+              </>
+            )}
+            {!editMode && (
+              <>
+                <button 
+                  className="bg-black text-white h-10 w-2/5 rounded-lg border"
+                  onClick={() => setEditMode(!editMode)}
+                >
+                  パスワード変更
+                </button>
+                <button 
+                  className="bg-red-500 text-white h-10 w-2/5 rounded-lg border"
+                  onClick={() =>
+                    dialog.showDialog(
+                      MESSAGE.info.WITHDRAWAL_CONFIRM,
+                      undefined,
+                      'confirm',
+                      execWithdraw
+                    )
+                  }
+                  disabled={isWithdrawing}
+                >
+                  ユーザー退会
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

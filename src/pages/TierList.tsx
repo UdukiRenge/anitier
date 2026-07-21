@@ -14,6 +14,7 @@ import { sessionAtom } from '../jotai/authAtom';
 import { MESSAGE } from '../constants/message';
 import Dialog from '../components/Dialog';
 import useDialog from '../hooks/useDialog';
+import SEO from "../components/seo";
 
 const TierList: React.FC = () => {
   const navigate = useNavigate();
@@ -136,33 +137,36 @@ const TierList: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen">
-      <Dialog
-        message={dialog.message}
-        isOpen={dialog.isOpen}
-        onClose={dialog.closeDialog}
-        type={dialog.type}
-        onCancel={dialog.closeCancel}
-      />
-      <div className="mt-10 mx-auto w-1/2">
-        <SearchArea />
-      </div>
-      <div className="mx-auto my-5 mb-10 min-h-0 max-w-5xl flex flex-col flex-1 gap-4 w-full">
-        <div className="flex-1 overflow-y-auto">
-          {tierList.length === 0 && (
-            <div className="text-center text-gray-500">ティア表がありません</div>
-          )}
-          {tierList.length > 0 && (
-            <TierGrid
-              tierList={tierList}
-              isDeleteMode={isDeleteMode}
-              selectedTierIds={selectedTierIds}
-              onToggleSelect={handleTierSelectToggle}
-            />
-          )}
+    <>
+      <SEO title="ティア表一覧" description="作成したティア表を一覧できます。" />
+      <div className="flex flex-col h-screen">
+        <Dialog
+          message={dialog.message}
+          isOpen={dialog.isOpen}
+          onClose={dialog.closeDialog}
+          type={dialog.type}
+          onCancel={dialog.closeCancel}
+        />
+        <div className="mt-10 mx-auto w-1/2">
+          <SearchArea />
+        </div>
+        <div className="mx-auto my-5 mb-10 min-h-0 max-w-5xl flex flex-col flex-1 gap-4 w-full">
+          <div className="flex-1 overflow-y-auto">
+            {tierList.length === 0 && (
+              <div className="text-center text-gray-500">ティア表がありません</div>
+            )}
+            {tierList.length > 0 && (
+              <TierGrid
+                tierList={tierList}
+                isDeleteMode={isDeleteMode}
+                selectedTierIds={selectedTierIds}
+                onToggleSelect={handleTierSelectToggle}
+              />
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

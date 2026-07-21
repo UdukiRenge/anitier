@@ -18,6 +18,7 @@ import type { SerchedAnime } from '../models/animeModels';
 import { isDetailAtom } from '../jotai/detailAtom';
 import Dialog from '../components/Dialog';
 import useDialog from '../hooks/useDialog';
+import SEO from "../components/seo";
 
 type SearchAreaProps = {
   title: string;
@@ -185,53 +186,56 @@ const Search: React.FC = () => {
   };
   
   return (
-    <div className="flex flex-col h-screen">
-      <Dialog
-        message={dialog.message}
-        isOpen={dialog.isOpen}
-        onClose={dialog.closeDialog}
-        type={dialog.type}
-        onCancel={dialog.closeCancel}
-      />
-      <AnimeDetail/>
-      <div className='mt-14 mx-auto w-1/2'>
-        <SearchArea
-          title={title}
-          onTitleChange={setTitle}
-          onSearch={() => handleSearch(title, "", "", 0)}
+    <>
+      <SEO title="検索画面" description="アニメを検索できます。また、検索したアニメにリアクションをつけることができます。" />
+      <div className="flex flex-col h-screen">
+        <Dialog
+          message={dialog.message}
+          isOpen={dialog.isOpen}
+          onClose={dialog.closeDialog}
+          type={dialog.type}
+          onCancel={dialog.closeCancel}
         />
-        <p
-          className="mt-3 w-fit cursor-pointer text-blue-500 hover:underline"
-          onClick={() => setCondition(!condition)} 
-        >
-          {condition ? "-条件検索" : "+条件検索"}
-        </p>
-      </div>
-      {condition && (
-        <ConditionSearchArea
-          genre={genre}
-          onGenreChange={setGenre}
-          season={season}
-          onSeasonChange={setSeason}
-          seasonYear={seasonYear}
-          onSeasonYearChange={setSeasonYear}
-          onSearch={() => handleSearch("", genre, season, Number(seasonYear))}
-        />
-      )}
-      <div className="mx-auto mt-5 min-h-0 max-w-5xl flex flex-col flex-1 gap-4 w-full">
-        <h2 className="text-xl font-bold ml-5">
-          {searched ? "検索結果" : "今期放送中のアニメ"}
-        </h2>
-        <div className="flex-1 mb-10 overflow-y-auto">
-          {animeList.length === 0 && searched && (
-            <div className="text-center py-10">
-              <p className="text-gray-500">{MESSAGE.info.ANIME_NOTFOUND}</p>
-            </div>
-          )}
-          <AnimeGrid animeList={animeList} />
+        <AnimeDetail/>
+        <div className='mt-14 mx-auto w-1/2'>
+          <SearchArea
+            title={title}
+            onTitleChange={setTitle}
+            onSearch={() => handleSearch(title, "", "", 0)}
+          />
+          <p
+            className="mt-3 w-fit cursor-pointer text-blue-500 hover:underline"
+            onClick={() => setCondition(!condition)} 
+          >
+            {condition ? "-条件検索" : "+条件検索"}
+          </p>
+        </div>
+        {condition && (
+          <ConditionSearchArea
+            genre={genre}
+            onGenreChange={setGenre}
+            season={season}
+            onSeasonChange={setSeason}
+            seasonYear={seasonYear}
+            onSeasonYearChange={setSeasonYear}
+            onSearch={() => handleSearch("", genre, season, Number(seasonYear))}
+          />
+        )}
+        <div className="mx-auto mt-5 min-h-0 max-w-5xl flex flex-col flex-1 gap-4 w-full">
+          <h2 className="text-xl font-bold ml-5">
+            {searched ? "検索結果" : "今期放送中のアニメ"}
+          </h2>
+          <div className="flex-1 mb-10 overflow-y-auto">
+            {animeList.length === 0 && searched && (
+              <div className="text-center py-10">
+                <p className="text-gray-500">{MESSAGE.info.ANIME_NOTFOUND}</p>
+              </div>
+            )}
+            <AnimeGrid animeList={animeList} />
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

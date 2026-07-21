@@ -9,6 +9,7 @@ import { login } from '../supabase/login';
 import { SupabaseError, SupabaseErrorCode } from '../models/supabaseError';
 import Dialog from '../components/Dialog';
 import useDialog from '../hooks/useDialog';
+import SEO from "../components/seo";
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -65,44 +66,48 @@ const Login: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen">
-      <Dialog
-        message={dialog.message}
-        isOpen={dialog.isOpen}
-        onClose={dialog.closeDialog}
-        type={dialog.type}
-        onCancel={dialog.closeCancel}
-      />
-      <p className="text-4xl md:text-5xl font-black ">ログイン</p>
-      <div className="flex flex-col h-fit justify-center mt-5 w-2/5 max-w-xl min-w-80 bg-white border-gray-400 border p-10 rounded-lg shadow-lg gap-3">
-        <>
-          <p>ユーザー名</p>
-          <input
-            type="text"
-            placeholder="ユーザー名" 
-            value={user_name}
-            onChange={(e) => setUser_name(e.target.value)}
-            className="border mb-5 p-2 rounded-lg w-auto"
-          />
-        </>
+    <>
+      <SEO title="ログイン画面" description="AniTierのログイン画面です。" />
+      <div className="flex flex-col items-center justify-center h-screen">
+        
+        <Dialog
+          message={dialog.message}
+          isOpen={dialog.isOpen}
+          onClose={dialog.closeDialog}
+          type={dialog.type}
+          onCancel={dialog.closeCancel}
+        />
+        <p className="text-4xl md:text-5xl font-black ">ログイン</p>
+        <div className="flex flex-col h-fit justify-center mt-5 w-2/5 max-w-xl min-w-80 bg-white border-gray-400 border p-10 rounded-lg shadow-lg gap-3">
           <>
-          <p>パスワード</p>
-          <input
-            type="password"
-            placeholder="パスワード"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)} 
-            className="border mb-5 p-2 rounded-lg w-auto"
-          />
-        </>
-        <button 
-          className="bg-black text-white h-10 w-auto rounded-lg border"
-          onClick={() => execLogin()}
-        >
-          ログイン
-        </button>
+            <p>ユーザー名</p>
+            <input
+              type="text"
+              placeholder="ユーザー名" 
+              value={user_name}
+              onChange={(e) => setUser_name(e.target.value)}
+              className="border mb-5 p-2 rounded-lg w-auto"
+            />
+          </>
+            <>
+            <p>パスワード</p>
+            <input
+              type="password"
+              placeholder="パスワード"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)} 
+              className="border mb-5 p-2 rounded-lg w-auto"
+            />
+          </>
+          <button 
+            className="bg-black text-white h-10 w-auto rounded-lg border"
+            onClick={() => execLogin()}
+          >
+            ログイン
+          </button>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

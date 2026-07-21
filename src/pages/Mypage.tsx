@@ -16,6 +16,7 @@ import type { PickupCategory } from '../models/category';
 import { isDetailAtom } from '../jotai/detailAtom';
 import Dialog from '../components/Dialog';
 import useDialog from '../hooks/useDialog';
+import SEO from "../components/seo";
 
 const tabtypes = [
   { id: 'favorite' as PickupCategory, label: 'お気に入り' },
@@ -120,23 +121,26 @@ const Mypage: React.FC = () => {
   };
   
   return (
-    <div className="flex flex-col items-center min-h-screen">
-      <Dialog
-        message={dialog.message}
-        isOpen={dialog.isOpen}
-        onClose={dialog.closeDialog}
-        type={dialog.type}
-        onCancel={dialog.closeCancel}
-      />
-      <AnimeDetail />
-      <TabButtons />
-      <div className="mt-4 mb-10 w-full flex-1 overflow-y-auto flex justify-center">
-        <AnimeGrid 
-          animeList={show}
-          updatePickupStatus={updatePickupStatus}
+    <>
+      <SEO title="マイページ" description="リアクションをつけたアニメを一覧できます。" />
+      <div className="flex flex-col items-center min-h-screen">
+        <Dialog
+          message={dialog.message}
+          isOpen={dialog.isOpen}
+          onClose={dialog.closeDialog}
+          type={dialog.type}
+          onCancel={dialog.closeCancel}
         />
+        <AnimeDetail />
+        <TabButtons />
+        <div className="mt-4 mb-10 w-full flex-1 overflow-y-auto flex justify-center">
+          <AnimeGrid 
+            animeList={show}
+            updatePickupStatus={updatePickupStatus}
+          />
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

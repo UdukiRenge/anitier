@@ -8,7 +8,7 @@ import { signUp } from '../supabase/signUp';
 import { SupabaseError, SupabaseErrorCode } from '../models/supabaseError';
 import Dialog from '../components/Dialog';
 import useDialog from '../hooks/useDialog';
-
+import SEO from "../components/seo";
 
 const Signup: React.FC = () => {
   const setSpinner = useSetAtom(spinnerAtom);
@@ -70,54 +70,57 @@ const Signup: React.FC = () => {
   }
       
   return (
-    <div className="flex flex-col items-center h-screen overflow-auto">
-      <Dialog
-        message={dialog.message}
-        isOpen={dialog.isOpen}
-        onClose={dialog.closeDialog}
-        type={dialog.type}
-        onCancel={dialog.closeCancel}
-      />
-      <p className="mt-30 text-4xl md:text-5xl font-black ">新規登録</p>
-      <div className="flex flex-col h-fit justify-center mt-5 mb-30 w-2/5 max-w-xl min-w-80 bg-white border-gray-400 border p-10 rounded-lg shadow-lg gap-3">
-        <>
-          <p>ユーザー名</p>
-          <input
-            type="text"
-            placeholder="ユーザー名"
-            value={user_name}
-            onChange={(e) => setUser_name(e.target.value)}
-            className="border mb-5 p-2 rounded-lg w-auto"
-          />
-        </>
-        <>
-          <p>パスワード</p>
-          <input
-            type="password"
-            placeholder="パスワード"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="border mb-5 p-2 rounded-lg w-auto"
-          />
-        </>
-        <>
-          <p>パスワード確認用</p>
-          <input
-            type="password"
-            placeholder="パスワード"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            className="border mb-5 p-2 rounded-lg w-auto"
-          />
-        </>
-        <button 
-          className="bg-black text-white h-10 w-auto rounded-lg border"
-          onClick={() => execSignUp()}
-        >
-          登録
-        </button>
+    <>
+      <SEO title="新規登録画面" description="AniTierの新規登録画面です。" />
+      <div className="flex flex-col items-center h-screen overflow-auto">
+        <Dialog
+          message={dialog.message}
+          isOpen={dialog.isOpen}
+          onClose={dialog.closeDialog}
+          type={dialog.type}
+          onCancel={dialog.closeCancel}
+        />
+        <p className="mt-30 text-4xl md:text-5xl font-black ">新規登録</p>
+        <div className="flex flex-col h-fit justify-center mt-5 mb-30 w-2/5 max-w-xl min-w-80 bg-white border-gray-400 border p-10 rounded-lg shadow-lg gap-3">
+          <>
+            <p>ユーザー名</p>
+            <input
+              type="text"
+              placeholder="ユーザー名"
+              value={user_name}
+              onChange={(e) => setUser_name(e.target.value)}
+              className="border mb-5 p-2 rounded-lg w-auto"
+            />
+          </>
+          <>
+            <p>パスワード</p>
+            <input
+              type="password"
+              placeholder="パスワード"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="border mb-5 p-2 rounded-lg w-auto"
+            />
+          </>
+          <>
+            <p>パスワード確認用</p>
+            <input
+              type="password"
+              placeholder="パスワード"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="border mb-5 p-2 rounded-lg w-auto"
+            />
+          </>
+          <button 
+            className="bg-black text-white h-10 w-auto rounded-lg border"
+            onClick={() => execSignUp()}
+          >
+            登録
+          </button>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

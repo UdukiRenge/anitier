@@ -30,6 +30,7 @@ import { fetchTierDetail } from '../supabase/fetchTierDetail';
 import { fetchTierItemsWithAnimeDetail } from '../supabase/fetchTierItems';
 import { MESSAGE } from '../constants/message';
 import useDialog from '../hooks/useDialog';
+import SEO from "../components/seo";
 
 const TIER_RANKS = ['S', 'A', 'B', 'C', 'D'] as const
 const isTierRank = (id: unknown): id is TierRank =>
@@ -324,6 +325,7 @@ const TierEditor: React.FC = () => {
 
   return (
     <>
+      <SEO title="ティア表編集画面" description="ティア表の作成・編集が可能です。" />
       <Dialog
         message={dialog.message}
         isOpen={dialog.isOpen}
